@@ -1,6 +1,10 @@
 ---
 title: "Lab 9"
-author: "Jack McCarthy"
+author: 
+  -  Emily Gentles
+  -  Weiyi Liu
+  -  Jack McCarthy
+  -  Qinzhe Wang
 date: "10/28/2021"
 output: pdf_document
 ---
@@ -9,6 +13,8 @@ output: pdf_document
 library(tidyverse)
 library(lme4)
 library(janitor)
+library(reshape2)
+library(kableExtra)
 
 knitr::opts_chunk$set(
   echo=FALSE,
@@ -89,5 +95,30 @@ data %>%
     geom_smooth(method='lm') +
     scale_x_discrete(guide=guide_axis(angle=45)) +
     labs(x='# Cattle (Bin Index)', y='Observed Signs Rate (w/ Sample Size)') +
+    theme_bw()
+```
+
+```{r}
+data %>%
+  select(accessible_cattle_house_present:molasses) %>%
+  sapply(., function(x) mean(x==data$signs_in_yard)) %>%
+  enframe(name='Indicator', value='Accuracy') %>%
+  kable(digits=4) %>%
+  kable_classic(full_width=FALSE, latex_options='HOLD_position') %>%
+  row_spec(c(2,8:10), bold=TRUE)
+```
+
+```{r}
+data %>%
+  mutate(year_season=paste0(year, '.', season)) %>%
+  group_by(year_season) %>%
+  summarise(
+    n=n(),
+    signs_rate=mean(signs_in_yard)
+  ) %>%
+  ggplot(aes(x=year_season, y=signs_rate)) +
+    geom_bar(stat='identity', color='black', fill='plum2') +
+    geom_text(aes(label=n), vjust=-0.25) +
+    labs(x='Year.Season', y='Observed Signs Rate (w/ Sample Size)') +
     theme_bw()
 ```
