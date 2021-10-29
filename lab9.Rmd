@@ -16,6 +16,7 @@ library(janitor)
 library(reshape2)
 library(kableExtra)
 library(caret)
+library(lattice)
 
 knitr::opts_chunk$set(
   echo=FALSE,
@@ -138,10 +139,11 @@ data %>%
 
 ```{r}
 model <- glmer(
-  signs_in_yard ~ no_active_setts_in_fields + no_cattle_in_buildings_yard + hay_straw + (1 | farm_code_numeric), 
+  signs_in_yard ~ no_active_setts_in_fields + no_cattle_in_buildings_yard + hay_straw + (1 | farm_code_numeric),
   family='binomial',
   data=data
 )
 
 summary(model)
+dotplot(ranef(model))
 ```
