@@ -15,6 +15,7 @@ library(lme4)
 library(janitor)
 library(reshape2)
 library(kableExtra)
+library(caret)
 
 knitr::opts_chunk$set(
   echo=FALSE,
@@ -25,7 +26,8 @@ knitr::opts_chunk$set(
 
 ```{r}
 data <- read.table('BadgersFarmSurveysNoNA.txt', header=TRUE) %>%
-  janitor::clean_names()
+  janitor::clean_names() %>%
+  rename(no_cattle_in_buildings_yard=no_cattle_in_buidlings_yard)
 ```
 
 ```{r}
@@ -64,8 +66,8 @@ data %>%
 ```{r}
 data %>%
   mutate(cattle_bin=cut(
-      no_cattle_in_buidlings_yard,
-      breaks=quantile(no_cattle_in_buidlings_yard, (1:10)/10),
+      no_cattle_in_buildings_yard,
+      breaks=quantile(no_cattle_in_buildings_yard, (1:10)/10),
       include.lowest=TRUE
     )
   ) %>%
@@ -84,7 +86,7 @@ data %>%
 
 ```{r}
 data %>%
-  mutate(cattle_bin=cut_interval(no_cattle_in_buidlings_yard, n=25)) %>%
+  mutate(cattle_bin=cut_interval(no_cattle_in_buildings_yard, n=25)) %>%
   group_by(cattle_bin) %>%
   summarise(
     n=n(),
@@ -109,6 +111,17 @@ data %>%
 ```
 
 ```{r}
+confusionMatrix(
+  factor(data$proteinblocks), 
+  factor(data$signs_in_yard)
+)
+```
+
+The accuracy is good for some indicators because most observations are 0 for the 
+response. The confusion matrix shows that the indicators do not have as much 
+predictive power as it may seem from the accuracy alone.
+
+```{r}
 data %>%
   mutate(year_season=paste0(year, '.', season)) %>%
   group_by(year_season) %>%
@@ -121,4 +134,14 @@ data %>%
     geom_text(aes(label=n), vjust=-0.25) +
     labs(x='Year.Season', y='Observed Signs Rate (w/ Sample Size)') +
     theme_bw()
+```
+
+```{r}
+model <- glmer(
+  signs_in_yard ~ no_cattle_in_buildings_yard + hay_straw + (1 | farm_code_numeric), 
+  family='binomial',
+  data=data
+)
+
+summary(model)
 ```
