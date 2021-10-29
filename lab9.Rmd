@@ -163,3 +163,16 @@ Might not be good to incorporate time as a variable in model (if we take farm as
 random intercept by farm
 ICC for farms (obs were taken over time, so answers question of corr over time)
 Not required to do model diagnostics
+
+
+```{r}
+model2 <- glmer(
+  signs_in_yard ~ no_active_setts_in_fields + no_cattle_in_buildings_yard + (1 | farm_code_numeric),
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+
+summary(model2)
+dotplot(ranef(model2))
+```
