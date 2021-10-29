@@ -118,6 +118,7 @@ confusionMatrix(
 )
 ```
 
+Note: accuracy is the proportion of the data that are predicted correctly.
 The accuracy is good for some indicators because most observations are 0 for the 
 response. The confusion matrix shows that the indicators do not have as much 
 predictive power as it may seem from the accuracy alone.
