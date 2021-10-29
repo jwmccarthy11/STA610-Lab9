@@ -153,3 +153,13 @@ model <- glmer(
 summary(model)
 dotplot(ranef(model))
 ```
+
+
+Notes from TA:
+can ignore interaction terma
+Step-forward selection
+logistic regression (binary response)
+Might not be good to incorporate time as a variable in model (if we take farm as the group)
+random intercept by farm
+ICC for farms (obs were taken over time, so answers question of corr over time)
+Not required to do model diagnostics
