@@ -31,7 +31,12 @@ data <- read.table('BadgersFarmSurveysNoNA.txt', header=TRUE) %>%
   rename(no_cattle_in_buildings_yard=no_cattle_in_buidlings_yard)
 ```
 
-```{r}
+# EDA
+
+First a look at the distribution of the response. We can look at the mean 
+__signs_in_yard__ value for each farm to get a "rate" of signs being observed.
+
+```{r, fig.height=4}
 data %>%
   group_by(farm_code_numeric) %>%
   summarise(
@@ -46,7 +51,12 @@ data %>%
     theme_bw()
 ```
 
-```{r}
+It seems like the signs rates vary widely across farms, so we should expect to 
+see heterogeneity in our final model. Now we can look at the signs rates for 
+some of the candidate predictors. First, a look at the rates for each value of 
+the number of active badger settlements.
+
+```{r, fig.height=3.5}
 data %>%
   group_by(no_active_setts_in_fields) %>%
   summarise(
@@ -64,7 +74,13 @@ data %>%
     theme_bw()
 ```
 
-```{r}
+There seems to be a positive relationship between the number of active 
+settlements and the rate of badger signs in the yard. We may also look at the 
+relationship between the number of cattle and the signs rate. To do so we will 
+bin the number of cattle into 10% quantile increments and chart the rate for 
+each bin.
+
+```{r, fig.height=4}
 data %>%
   mutate(cattle_bin=cut(
       no_cattle_in_buildings_yard,
@@ -85,7 +101,11 @@ data %>%
     theme_bw()
 ```
 
-```{r}
+Again, there seems to be a slight positive relationship between the number of 
+cattle and the rate of badger sign observation. The plot below is an alternative 
+view of this relationship.
+
+```{r, fig.height=3}
 data %>%
   mutate(cattle_bin=cut_interval(no_cattle_in_buildings_yard, n=25)) %>%
   group_by(cattle_bin) %>%
@@ -100,6 +120,10 @@ data %>%
     labs(x='# Cattle (Bin Index)', y='Observed Signs Rate (w/ Sample Size)') +
     theme_bw()
 ```
+
+We also have several indicator variables to consider. To investigate these, we 
+can look at the accuracy in predicting the response using each indicator as a 
+sole predictor.
 
 ```{r}
 data %>%
@@ -123,7 +147,9 @@ The accuracy is good for some indicators because most observations are 0 for the
 response. The confusion matrix shows that the indicators do not have as much 
 predictive power as it may seem from the accuracy alone.
 
-```{r}
+Finally, we may look at the signs rate for each year and season combination.
+
+```{r, fig.height=3}
 data %>%
   mutate(year_season=paste0(year, '.', season)) %>%
   group_by(year_season) %>%
@@ -137,6 +163,9 @@ data %>%
     labs(x='Year.Season', y='Observed Signs Rate (w/ Sample Size)') +
     theme_bw()
 ```
+
+2003 and 2005 seem to have similar rates, but 2004 may have an appreciably 
+lower rate of badger sign observations.
 
 ```{r}
 # make relevant variables into factors
