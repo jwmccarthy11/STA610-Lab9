@@ -1,0 +1,93 @@
+---
+title: "Lab 9"
+author: "Jack McCarthy"
+date: "10/28/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lme4)
+library(janitor)
+
+knitr::opts_chunk$set(
+  echo=FALSE,
+  message=FALSE,
+  warning=FALSE
+)
+```
+
+```{r}
+data <- read.table('BadgersFarmSurveysNoNA.txt', header=TRUE) %>%
+  janitor::clean_names()
+```
+
+```{r}
+data %>%
+  group_by(farm_code_numeric) %>%
+  summarise(
+    n=n(),
+    signs_rate=mean(signs_in_yard)
+  ) %>%
+  ggplot(aes(x=reorder(farm_code_numeric, -signs_rate), y=signs_rate)) +
+    geom_bar(stat='identity', color='black', fill='lightcoral') +
+    geom_text(aes(label=n), vjust=-0.25) +
+    labs(x='Farm Code', y='Observed Signs Rate (w/ Sample Size)') +
+    scale_x_discrete(guide=guide_axis(angle=45)) +
+    theme_bw()
+```
+
+```{r}
+data %>%
+  group_by(no_active_setts_in_fields) %>%
+  summarise(
+    n=n(),
+    signs_rate=mean(signs_in_yard)
+  ) %>%
+  ggplot(aes(x=no_active_setts_in_fields, y=signs_rate)) +
+    geom_bar(stat='identity', color='black', fill='lightblue') +
+    geom_text(aes(label=n), vjust=-0.25) +
+    scale_x_continuous(
+      labels=as.character(unique(data$no_active_setts_in_fields)), 
+      breaks=unique(data$no_active_setts_in_fields)
+    ) +
+    labs(x='# Active Settlements', y='Observed Signs Rate (w/ Sample Size)') +
+    theme_bw()
+```
+
+```{r}
+data %>%
+  mutate(cattle_bin=cut(
+      no_cattle_in_buidlings_yard,
+      breaks=quantile(no_cattle_in_buidlings_yard, (1:10)/10),
+      include.lowest=TRUE
+    )
+  ) %>%
+  group_by(cattle_bin) %>%
+  summarise(
+    n=n(),
+    signs_rate=mean(signs_in_yard)
+  ) %>%
+  ggplot(aes(x=cattle_bin, y=signs_rate)) +
+    geom_bar(stat='identity', color='black', fill='lightgreen') +
+    geom_text(aes(label=n), vjust=-0.25) +
+    scale_x_discrete(guide=guide_axis(angle=45)) +
+    labs(x='# Cattle', y='Observed Signs Rate (w/ Sample Size)') +
+    theme_bw()
+```
+
+```{r}
+data %>%
+  mutate(cattle_bin=cut_interval(no_cattle_in_buidlings_yard, n=25)) %>%
+  group_by(cattle_bin) %>%
+  summarise(
+    n=n(),
+    signs_rate=mean(signs_in_yard)
+  ) %>%
+  ggplot(aes(x=1:length(unique(cattle_bin)), y=signs_rate)) +
+    geom_point() +
+    geom_smooth(method='lm') +
+    scale_x_discrete(guide=guide_axis(angle=45)) +
+    labs(x='# Cattle (Bin Index)', y='Observed Signs Rate (w/ Sample Size)') +
+    theme_bw()
+```
