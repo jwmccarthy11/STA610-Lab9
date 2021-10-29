@@ -138,10 +138,15 @@ data %>%
 ```
 
 ```{r}
+# make relevant variables into factors
+model_data <- data
+model_data[, c(1, 2, 10:21)] <- lapply(data[, c(1, 2, 10:21)] , factor)
+
 model <- glmer(
-  signs_in_yard ~ no_active_setts_in_fields + no_cattle_in_buildings_yard + hay_straw + (1 | farm_code_numeric),
+  signs_in_yard ~ no_active_setts_in_fields + no_cattle_in_buildings_yard + year + (1 | farm_code_numeric),
   family='binomial',
-  data=data
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
 )
 
 summary(model)
