@@ -256,11 +256,26 @@ k <- ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. molasses") +
   theme(plot.title = element_text(hjust = 0.5))
 
-(a + b) / (c + d)
+grid.arrange(a, b, c, d, nrow =2)
 
-(e + f) / (g + h)
+grid.arrange(e, f, g, h, nrow =2)
 
-(i + j) / k
+grid.arrange(j, h, k, nrow =2)
+```
+
+```{r}
+# prop table
+prop.table(table(data$signs_in_yard, data$accessible_cattle_house_present))
+prop.table(table(data$signs_in_yard, data$accessible_feed_present))
+prop.table(table(data$signs_in_yard, data$grass_silage))
+prop.table(table(data$signs_in_yard, data$cereal_silage))
+prop.table(table(data$signs_in_yard, data$hay_straw))
+prop.table(table(data$signs_in_yard, data$cereal_grains))
+prop.table(table(data$signs_in_yard, data$concentrates))
+prop.table(table(data$signs_in_yard, data$proteinblocks))
+prop.table(table(data$signs_in_yard, data$sugarbeet))
+prop.table(table(data$signs_in_yard, data$vegetables))
+prop.table(table(data$signs_in_yard, data$molasses))
 ```
 
 
@@ -310,78 +325,194 @@ lower rate of badger sign observations.
 
 
 
+# Model
 
+### Model Selection
 
-
-
+Based on our research question, our initial model only incorporates the random intercepts for farm, `farm_code_numeric`. Then we did forward step-wise model selection with potential predictors found in the EDA part using BIC score which considers both the likelihood and the model complexity and gives a more general sense of model performance while also being consistent.
 
 ```{r}
 # make relevant variables into factors
 model_data <- data
 model_data[, c(1, 2, 10:21)] <- lapply(data[, c(1, 2, 10:21)] , factor)
 
-model <- glmer(
-  signs_in_yard ~ no_active_setts_in_fields + no_cattle_in_buildings_yard + year + (1 | farm_code_numeric),
+# stepwise model selection
+m0 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric), 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m0) # 174.1727
+
+m1 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields, 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m1) # 169.5484
+
+m2 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields + no_cattle_in_buildings_yard, 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m2) # 172.9292
+
+m3 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields + proteinblocks, 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m3) # 174.4175
+
+m4 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields + sugarbeet, 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m4) # 174.5285
+
+m5 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields + vegetables, 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m5) # 173.4542
+
+m6 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields + year, 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m6) # 176.4669
+
+m7 <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields + season, 
+  family='binomial',
+  control=glmerControl(optimizer = "bobyqa"),
+  data=model_data
+)
+BIC(m7) # 185.5121
+```
+
+```{r}
+model <- c("(1|farm_code_numeric)",
+           "(1|farm_code_numeric) + no_active_setts_in_fields",
+           "(1|farm_code_numeric) + no_active_setts_in_fields + no_cattle_in_buildings_yard",
+           "(1|farm_code_numeric) + no_active_setts_in_fields + proteinblocks",
+           "(1|farm_code_numeric) + no_active_setts_in_fields + sugarbeet",
+           "(1|farm_code_numeric) + no_active_setts_in_fields + vegetables",
+           "(1|farm_code_numeric) + no_active_setts_in_fields + year",
+           "(1|farm_code_numeric) + no_active_setts_in_fields + season")
+
+BIC_score <- sapply(c(m0, m1, m2, m3, m4, m5, m6, m7), BIC)
+
+data.frame("Model" = model, 'BIC' = BIC_score) %>%
+  kable(caption = "Forward model selection") %>%
+    kable_styling(latex_options = c("HOLD_position","striped"))
+```
+
+From the table above, we decided only to add the fixed effect `no_active_setts_in_fields` to the initial model.
+
+
+### Final Model
+
+Our final model is
+
+$$Logit(E(Y_{ij}|b_i)) = X^T_{ij}\pmb{\beta}+b_i$$
+where $$b_i\sim N(0,\sigma^2)$$
+Here $Y_{ij}$ represents the presence of badgers at time $i$ on farm $j$, and $X_{ij}$'s has two columns, one for the intercept, and another for the `no_setts_in_fields` predictor.
+
+```{r}
+model_final <- glmer(
+  signs_in_yard ~ (1 | farm_code_numeric) + no_active_setts_in_fields, 
   family='binomial',
   control=glmerControl(optimizer = "bobyqa"),
   data=model_data
 )
 
-summary(model)
-dotplot(ranef(model))
+summary(model_final)
+dotplot(ranef(model_final))
 ```
 
 
+# Conclusion
+
+### Q1: What factors are relate to presence of badger activity in the farmyard?
+
+```{r}
+summary(model_final)$coefficients %>%
+  as.data.frame() %>%
+  mutate("lower 95%" = Estimate - 1.96 * `Std. Error`,
+         "upper 95%" = Estimate + 1.96 * `Std. Error`)  %>%
+  select(c("Estimate", "Std. Error", "lower 95%", "upper 95%")) %>%
+  kable(caption = "Estimates of fixed effects", digits = 4) %>%
+  kable_styling(latex_options = c("HOLD_position", "striped"))
+```
+
+Our final model can be interpretated in the following way:
+
+* **Intercept**: For a fixed farm, having no active badger homes in nearby fields, has odds of $e^{-4.8705} \approx 0.0077$ of the presence of badger activity.
+
+* **no_active_setts_in_fields**: For a fixed farm, for each unit increase in number of active badger homes in nearby fields, the farm will have $e^{0.4939} =1.6387$ times (a 63.87% increase) the odds of the presence of badger activity.
+
+Therefore, the number of active badger homes in nearby fields is related to the presence of badger activity in the farmyard.
+
+
+### Q2: Estimate the correlation over time in badger activity
+
+```{r}
+summary(model_final)
+```
+
+```{r}
+data.frame(summary(model_final)$varcor) %>%
+  mutate(Group = grp,
+         Variance = vcov) %>%
+  select(c("Group", "Variance")) %>%
+  kable(caption = "Estimates of random effects", digits = 4) %>%
+  kable_styling(latex_options = c("HOLD_position", "striped"))
+
+sigma2hat <- 5.9575
+icc <- sigma2hat / (sigma2hat + pi^2/3)
+icc
+```
+
+$$ICC = \frac{\sigma^2}{\sigma^2 + \frac{\pi^2}{3}} = 0.6442$$
+
+Since the observations for each farm are taken over a period of time, the ICC of this model represents the correlation over time. The estimated interclass correlation is 0.6442, indicating relatively high correlation over time in badger activity. 
+
+
+### Q3: Farm-specific heterogeneity in the tendency to have badger activity
+
+```{r}
+dotplot(ranef(model_final))$farm_code_numeric
+```
+
+```{r}
+ranef(model_final, condVar = TRUE) %>%
+  as.data.frame() %>%
+  filter(grpvar == "farm_code_numeric") %>%
+  arrange(desc(condval)) %>%
+  kable(caption = "Estimated random intercepts", longtable = T, digits = 4) %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+As displayed in the random intercepts plot, we did observe farm-specific heterogeneity in the tendency to have badger activity. On the baseline condition (no active badger homes in nearby fields), the odds of the presence of badger activity in the farmyard ranges from $e^{-2.5153} = 0.0808$ (farm 8) to $e^{4.9743} = 144.6475$ (farm 3). However, we also saw the confidence intervals being quite wide.
+
+
+
 Notes from TA:
-can ignore interaction terma
+can ignore interaction terms
 Step-forward selection
 logistic regression (binary response)
 Might not be good to incorporate time as a variable in model (if we take farm as the group)
 random intercept by farm
 ICC for farms (obs were taken over time, so answers question of corr over time)
 Not required to do model diagnostics
-
-$$Y_{ij}=X^T_{ij}\beta+b_i + \epsilon_{ij}$$ where $b_i\sim N(0,\sigma_b^2)\perp\epsilon_{ij}\sim N(0,\sigma^2_e)$ and $E(Y_{ij}|b_i)=X^T_{ij}\beta+b_i$. Here $Y_{ij}$ represents the presence of badgers at time $i$ on farm $j$.
-
-```{r}
-model2 <- glmer(
-  signs_in_yard ~ no_active_setts_in_fields + no_cattle_in_buildings_yard + (1 | farm_code_numeric),
-  family='binomial',
-  control=glmerControl(optimizer = "bobyqa"),
-  data=model_data
-)
-
-summary(model2)
-
-```
-
-
-* Intercept: We can expect odds of the presence of badger activity in the farmyard to decrease by 99.5%  ($1-e^{-5.227} \approx  99.5%$), if there is no settlements in the field and there is no cattles in the farm.
-
-* Holding other variables constant, in general, for every 1 unit increase in the number of active settlements in the field, we expect the odds of the presence of signs of badgers in the farmyard to increase by 61.1%  ($e^{0.477}3 -1 \approx  61.1%$).
-
-* Holding other variables constant, in general, for every 1 unit increase in the number of cattle in the farm, we expect the odds of the presence of signs of badgers in the farmyard to increase by 4.6%  ($e^{0.0046} -1 \approx  4.6%$).
-
-
-
-
-
-```{r}
-
-dotplot(ranef(model2))
-```
-
-## Research Question
-
-1) What factors are relate to presence of badger activity in the farmyard?
-2) Estimate the correlation over time in badger activity
-3) Farm-specific heterogeneity in the tendency to have badger activity
-
-```{r}
-sigma2hat <- sigma(model2)*sigma(model2)
-tau2hat <- as.numeric(VarCorr(model2)$farm_code_numeric)
-corrs <- c(sigma2hat,tau2hat,sigma2hat/(sigma2hat+(pi^2/3)))
-corrs
-```
-
-The interclass correlation is 0.233 which is our estimated correlation over time in badger activity. Since the observations for each farm are taken over a period of time, the ICC of this model represented the correlation over time.
