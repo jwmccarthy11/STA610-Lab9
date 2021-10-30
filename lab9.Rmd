@@ -36,7 +36,10 @@ data <- read.table('BadgersFarmSurveysNoNA.txt', header=TRUE) %>%
   janitor::clean_names() %>%
   rename(no_cattle_in_buildings_yard=no_cattle_in_buidlings_yard)
 ```
+
 # EDA
+
+### Reponse: Signs_in_yard
 
 First a look at the distribution of the response. We can look at the mean 
 __signs_in_yard__ value for each farm to get a "rate" of signs being observed.
@@ -78,6 +81,8 @@ data %>%
     labs(x='# Active Settlements', y='Observed Signs Rate (w/ Sample Size)') +
     theme_bw()
 ```
+
+### Number of cattle on the farm (no_cattle_in_buildings_yard)
 
 There seems to be a positive relationship between the number of active 
 settlements and the rate of badger signs in the yard. We may also look at the 
@@ -126,9 +131,131 @@ data %>%
     theme_bw()
 ```
 
+### predictors in number
+
+```{r}
+p1 <- ggplot(data, aes(x = as.factor(signs_in_yard), y = no_active_setts_in_fields, fill = signs_in_yard)) + 
+  geom_boxplot() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard")
+
+p2 <- ggplot(data, aes(x = as.factor(signs_in_yard), y = no_cattle_in_buildings_yard, fill = signs_in_yard)) + 
+  geom_boxplot() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard")
+
+p3 <- ggplot(data, aes(x = as.factor(signs_in_yard), y = no_setts_in_fields, fill = signs_in_yard)) + 
+  geom_boxplot() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard")
+
+
+p4 <- ggplot(data, aes(x = as.factor(signs_in_yard), y = no_buildings, fill = signs_in_yard)) + 
+  geom_boxplot() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard")
+
+grid.arrange(p1, p2, p3, p4, nrow =2)
+
+```
+
+### Other predictors in 0/1
+
 We also have several indicator variables to consider. To investigate these, we 
 can look at the accuracy in predicting the response using each indicator as a 
 sole predictor.
+
+```{r}
+## maybe add the plots to appendix
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("accessible_cattle_house_present", scales = "fixed") +
+  ggtitle("Sings in Yead vs. accessible_cattle_house_present") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("accessible_feed_present", scales = "fixed") +
+  ggtitle("Sings in Yead vs. accessible_feed_present") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("grass_silage", scales = "fixed") +
+  ggtitle("Sings in Yead vs. grass_silage") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("cereal_silage", scales = "fixed") +
+  ggtitle("Sings in Yead vs. cereal_silage") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("hay_straw", scales = "fixed") +
+  ggtitle("Sings in Yead vs. hay_straw") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("cereal_grains", scales = "fixed") +
+  ggtitle("Sings in Yead vs. cereal_grains") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("concentrates", scales = "fixed") +
+  ggtitle("Sings in Yead vs. concentrates") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("proteinblocks", scales = "fixed") +
+  ggtitle("Sings in Yead vs. proteinblocks") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("sugarbeet", scales = "fixed") +
+  ggtitle("Sings in Yead vs. sugarbeet") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("vegetables", scales = "fixed") +
+  ggtitle("Sings in Yead vs. vegetables") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+  geom_bar() + 
+  theme(legend.position = "none") + 
+  labs(x = "Signs in Yard") +
+  facet_wrap("molasses", scales = "fixed") +
+  ggtitle("Sings in Yead vs. molasses") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
 
 ```{r}
 data %>%
@@ -152,6 +279,8 @@ The accuracy is good for some indicators because most observations are 0 for the
 response. The confusion matrix shows that the indicators do not have as much 
 predictive power as it may seem from the accuracy alone.
 
+### Year and season
+
 Finally, we may look at the signs rate for each year and season combination.
 
 ```{r, fig.height=3}
@@ -173,20 +302,7 @@ data %>%
 lower rate of badger sign observations.
 
 
-```{r}
-p1 <- ggplot(data, aes(x = as.factor(signs_in_yard), y = no_active_setts_in_fields, fill = signs_in_yard)) + 
-  geom_boxplot() + 
-  theme(legend.position = "none") + 
-  labs(x = "Signs in Yard")
 
-p2 <- ggplot(data, aes(x = as.factor(signs_in_yard), y = no_active_setts_in_fields, fill = signs_in_yard)) + 
-  geom_boxplot() + 
-  theme(legend.position = "none") + 
-  labs(x = "Signs in Yard")
-
-grid.arrange(p1, p2, nrow =1)
-
-```
 
 
 
@@ -247,7 +363,10 @@ summary(model2)
 dotplot(ranef(model2))
 ```
 
+## Research Question
 
-
+1) What factors are relate to presence of badger activity in the farmyard?
+2) Estimate the correlation over time in badger activity
+3) Farm-specific heterogeneity in the tendency to have badger activity
 
 
