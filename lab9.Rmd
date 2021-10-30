@@ -23,6 +23,7 @@ library(kableExtra)
 library(caret)
 library(lattice)
 library(gridExtra)
+library(patchwork)
 
 knitr::opts_chunk$set(
   echo=FALSE,
@@ -133,7 +134,7 @@ data %>%
 
 ### predictors in number
 
-```{r}
+```{r fig.height=2.5}
 p1 <- ggplot(data, aes(x = as.factor(signs_in_yard), y = no_active_setts_in_fields, fill = signs_in_yard)) + 
   geom_boxplot() + 
   theme(legend.position = "none") + 
@@ -167,7 +168,7 @@ sole predictor.
 
 ```{r}
 ## maybe add the plots to appendix
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+a <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -175,7 +176,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. accessible_cattle_house_present") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+b <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -183,7 +184,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. accessible_feed_present") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+c <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -191,7 +192,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. grass_silage") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+d <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -199,7 +200,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. cereal_silage") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+e <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -207,7 +208,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. hay_straw") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+f <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -215,7 +216,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. cereal_grains") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+g <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -223,7 +224,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. concentrates") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+h <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -231,7 +232,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. proteinblocks") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+i <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -239,7 +240,7 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. sugarbeet") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+j <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
@@ -247,13 +248,19 @@ ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yead vs. vegetables") +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data, aes(x = as.factor(signs_in_yard))) + 
+k <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
   theme(legend.position = "none") + 
   labs(x = "Signs in Yard") +
   facet_wrap("molasses", scales = "fixed") +
   ggtitle("Sings in Yead vs. molasses") +
   theme(plot.title = element_text(hjust = 0.5))
+
+(a + b) / (c + d)
+
+(e + f) / (g + h)
+
+(i + j) / k
 ```
 
 
@@ -334,6 +341,7 @@ random intercept by farm
 ICC for farms (obs were taken over time, so answers question of corr over time)
 Not required to do model diagnostics
 
+$$Y_{ij}=X^T_{ij}\beta+b_i + \epsilon_{ij}$$ where $b_i\sim N(0,\sigma_b^2)\perp\epsilon_{ij}\sim N(0,\sigma^2_e)$ and $E(Y_{ij}|b_i)=X^T_{ij}\beta+b_i$. Here $Y_{ij}$ represents the presence of badgers at time $i$ on farm $j$.
 
 ```{r}
 model2 <- glmer(
@@ -348,11 +356,11 @@ summary(model2)
 ```
 
 
-* Intercept: We can expect odds of the presence of badger activity in the farmyard decrease by 99.5%  ($1-e^{-5.227} \approx  99.5%$), if there is no settlements in the field and there is no cattles in the farm.
+* Intercept: We can expect odds of the presence of badger activity in the farmyard to decrease by 99.5%  ($1-e^{-5.227} \approx  99.5%$), if there is no settlements in the field and there is no cattles in the farm.
 
-* Holding other variables as constants, in general,1 unit increase in the number of active settlements in the field, we expect the odds of the presence of signs of badgers in the farmyard to increase by 61.1%  ($e^{0.477}3 -1 \approx  61.1%$).
+* Holding other variables constant, in general, for every 1 unit increase in the number of active settlements in the field, we expect the odds of the presence of signs of badgers in the farmyard to increase by 61.1%  ($e^{0.477}3 -1 \approx  61.1%$).
 
-* Holding other variables as constants, in general,1 unit increase in the number of cattles in the farm, we expect the odds of the presence of signs of badgers in the farmyard to increase by 4.6%  ($e^{0.0046} -1 \approx  4.6%$).
+* Holding other variables constant, in general, for every 1 unit increase in the number of cattle in the farm, we expect the odds of the presence of signs of badgers in the farmyard to increase by 4.6%  ($e^{0.0046} -1 \approx  4.6%$).
 
 
 
@@ -369,4 +377,11 @@ dotplot(ranef(model2))
 2) Estimate the correlation over time in badger activity
 3) Farm-specific heterogeneity in the tendency to have badger activity
 
+```{r}
+sigma2hat <- sigma(model2)*sigma(model2)
+tau2hat <- as.numeric(VarCorr(model2)$farm_code_numeric)
+corrs <- c(sigma2hat,tau2hat,sigma2hat/(sigma2hat+(pi^2/3)))
+corrs
+```
 
+The interclass correlation is 0.233 which is our estimated correlation over time in badger activity. Since the observations for each farm are taken over a period of time, the ICC of this model represented the correlation over time.
