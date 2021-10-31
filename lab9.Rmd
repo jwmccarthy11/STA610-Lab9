@@ -14,7 +14,7 @@ geometry: "left=1.5cm,right=1.5cm,top=1.25cm,bottom=1.75cm"
 
 ## Introduction
 
-Management of badgers on Welsh and British farms is a disputable topic. Some people agree that culling badger populations are necessary to control the spread of bovine tuberculosis. In contrast, others argue that badgers are not the primary cause of the spread of disease and that culling is inhumane.
+Management of badgers on Welsh and British farms is a disputed topic. Some people agree that culling badger populations are necessary to control the spread of bovine tuberculosis while others argue that badgers are not the primary cause of the spread of disease and that culling is inhumane.
 
 This lab aims to examine the factors related to the presence of badger activity in the farmyard and the correlation over time in badger activity and farm-specific heterogeneity in the tendency to have badger activity. Each farm was observed up to eight times (once per season for a two-year period).
 
@@ -281,11 +281,8 @@ k <- ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yard vs. molasses") +
   theme(plot.title = element_text(hjust = 0.5))
 
-grid.arrange(a, b, c, d, nrow =2)
+grid.arrange(a, b, c, d, e, f, g, h, i, j, k, nrow =6)
 
-grid.arrange(e, f, g, h, nrow =2)
-
-grid.arrange(j, h, k, nrow =2)
 ```
 
 
@@ -553,7 +550,7 @@ grid.arrange(p1, p2, p3, p4, nrow =2)
 
 ```
 
-```{r, echo=FALSE,fig.height=3.2}
+```{r, echo=FALSE,fig.height=10}
 ## maybe add the plots to appendix
 a <- ggplot(data, aes(x = as.factor(signs_in_yard))) + 
   geom_bar() + 
@@ -643,11 +640,7 @@ k <- ggplot(data, aes(x = as.factor(signs_in_yard))) +
   ggtitle("Sings in Yard vs. molasses") +
   theme(plot.title = element_text(hjust = 0.5))
 
-grid.arrange(a, b, c, d, ncol =2)
-
-grid.arrange(e, f, g, h, ncol =2)
-
-grid.arrange(j, h, k, ncol =2)
+grid.arrange(a, b, c, d, e, f, g, h, i, j, k, nrow =6)
 ```
 
 ### Conclusion
